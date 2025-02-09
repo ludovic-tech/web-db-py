@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Interface FastAPI</title>
+</head>
+<body>
+    <h1>Interface Web</h1>
+    <h2>Ajouter un élément</h2>
+    <form id="addItemForm">
+        <input type="text" id="name" placeholder="Nom" required>
+        <input type="text" id="description" placeholder="Description" required>
+        <button type="submit">Ajouter</button>
+    </form>
+    
+    <h2>Liste des éléments</h2>
+    <button onclick="fetchItems()">Actualiser la liste</button>
+    <ul id="itemsList"></ul>
+    
+    <h2>Supprimer un élément</h2>
+    <input type="number" id="deleteId" placeholder="ID de l'élément">
+    <button onclick="deleteItem()">Supprimer</button>
+    
+    <script>
+        const API_URL = "http://formation.ludovic.io:8000/items/";
+
+        document.getElementById("addItemForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const name = document.getElementById("name").value;
+            const description = document.getElementById("description").value;
+
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, description })
+            });
+            fetchItems();
+        });
+
+        async function fetchItems() {
+            const response = await fetch(API_URL);
+            const items = await response.json();
+            const list = document.getElementById("itemsList");
+            list.innerHTML = "";
+            items.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = `${item.id}: ${item.name} - ${item.description}`;
+                list.appendChild(li);
+            });
+        }
+
+        async function deleteItem() {
+            const id = document.getElementById("deleteId").value;
+            if (!id) return;
+            await fetch(`${API_URL}${id}`, { method: "DELETE" });
+            fetchItems();
+        }
+    </script>
+</body>
+</html>
